@@ -10,7 +10,7 @@ A full-stack application for processing invoices using AI agents, built with Rea
 - OpenAI API key
 
 ## Project Structure
-
+```
 llm-ecosystem/
 ├── backend/
 │   ├── ai_agents/
@@ -48,7 +48,7 @@ llm-ecosystem/
 │
 ├── .gitignore
 └── README.md
-
+```
 ## Quick Start
 
 1. Clone the repository:
