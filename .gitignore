@@ -15,6 +15,8 @@ __pycache__/
 *.bmp
 *.tiff
 
+node_modules
+
 # Distribution / packaging
 .Python
 build/
