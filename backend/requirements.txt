@@ -17,3 +17,7 @@ duckduckgo-search==3.9.3
 flask-socketio==5.3.2
 python-engineio==4.3.4
 python-socketio==5.7.2 
+PyPDF2
+python-magic
+pytesseract
+Pillow

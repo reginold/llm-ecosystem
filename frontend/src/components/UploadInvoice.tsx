@@ -12,7 +12,11 @@ const UploadInvoice: React.FC = () => {
   const mutation = useMutation(uploadInvoice, {
     onSuccess: (data) => {
       console.log('Upload successful', data);
-      navigate(`/results/${data.task_id}`);
+      if (data.task_id) {
+        navigate(`/results/${data.task_id}`);
+      } else {
+        setError('No task ID received from server');
+      }
     },
     onError: (error: Error) => {
       setError(error.message);
@@ -29,21 +33,28 @@ const UploadInvoice: React.FC = () => {
     }
   }, []);
 
-  const validateFile = (file: File): boolean => {
-    const allowedTypes = ['application/pdf', 'text/csv', 'application/json'];
+  const validateFile = (file: File) => {
+    const validTypes = [
+      'application/pdf',
+      'image/jpeg',
+      'image/png',
+      'image/jpg',
+      'text/plain',
+      'text/csv'
+    ];
+    
+    if (!validTypes.includes(file.type)) {
+      alert('File type not supported. Please upload a PDF, image (JPG/PNG), or text file.');
+      return false;
+    }
+    
+    // Check file size (e.g., 10MB limit)
     const maxSize = 10 * 1024 * 1024; // 10MB
-
-    if (!allowedTypes.includes(file.type)) {
-      setError('Invalid file type. Please upload a PDF, CSV, or JSON file.');
-      return false;
-    }
-
     if (file.size > maxSize) {
-      setError('File is too large. Maximum size is 10MB.');
+      alert('File is too large. Maximum size is 10MB.');
       return false;
     }
-
-    setError(null);
+    
     return true;
   };
 

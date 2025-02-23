@@ -1,8 +1,8 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from werkzeug.utils import secure_filename
-from models import db, Invoice, PurchaseOrder, ReconciliationResult
-from ai_agents.crew import InvoiceCrew
+from models import db, Invoice, ReconciliationResult
+from ai_agents.crew import InvoiceProcessor
 from celery import Celery
 import os
 from datetime import datetime
@@ -71,7 +71,7 @@ def process_invoice(invoice_id: int):
             logger.info(f"Updated invoice status to PROCESSING: {invoice_id}")
 
             # Initialize AI processing with socketio
-            crew = InvoiceCrew(socketio=socketio)
+            crew = InvoiceProcessor(socketio=socketio)
             extracted_data = crew.process_invoice(invoice.file_path)
             logger.info(f"AI processing completed for invoice: {invoice_id}")
 

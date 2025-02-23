@@ -1,9 +1,17 @@
 export interface Invoice {
-  id: number;
-  file_path: string;
-  upload_date: string;
+  id: string;
   status: string;
+  file_path: string;
+  created_at: string;
   extracted_data: any;
+  validation_status: string;
+  confidence_score: number;
+  discrepancies: {
+    source_type: string;
+    ocr_confidence: string;
+    extracted_text: string;
+    analysis_result: string;
+  };
 }
 
 export interface PurchaseOrder {
@@ -18,6 +26,12 @@ export interface ReconciliationResult {
   invoice_id: number;
   po_id: number;
   status: string;
-  discrepancies: any;
+  discrepancies: {
+    source_type: string;
+    ocr_confidence: string;
+    extracted_text: string;
+    analysis_result: string;
+  };
+  extracted_data: string;
   ai_notes: string;
 } 

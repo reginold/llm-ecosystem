@@ -25,6 +25,10 @@ export const uploadInvoice = async (file: File): Promise<UploadResponse> => {
       },
     });
     
+    if (!response.data.task_id) {
+      throw new Error('No task ID received');
+    }
+    
     return response.data;
   } catch (error) {
     if (axios.isAxiosError(error)) {
