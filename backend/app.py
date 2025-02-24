@@ -183,7 +183,6 @@ def get_results(task_id):
             logger.info(f"Task completed: {result}")
             if result.get('success'):
                 invoice_id = result['invoice_id']
-                # Get the invoice data directly
                 invoice = Invoice.query.get(invoice_id)
                 if invoice:
                     return jsonify({
@@ -191,9 +190,7 @@ def get_results(task_id):
                         'extracted_data': invoice.extracted_data,
                         'discrepancies': {
                             'source_type': 'image',
-                            'ocr_confidence': 'high',
-                            'extracted_text': 'Processed with Qwen VL',
-                            'analysis_result': invoice.extracted_data
+                            'ocr_confidence': 'high'
                         }
                     }), 200
             return jsonify(result), 200
