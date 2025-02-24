@@ -71,7 +71,7 @@ def process_invoice(invoice_id: int):
             logger.info(f"Updated invoice status to PROCESSING: {invoice_id}")
 
             # Initialize AI processing with socketio
-            crew = InvoiceProcessor(socketio=socketio)
+            crew = InvoiceProcessor()
             extracted_data = crew.process_invoice(invoice.file_path)
             logger.info(f"AI processing completed for invoice: {invoice_id}")
 
