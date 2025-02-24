@@ -8,6 +8,7 @@ interface UploadResponse {
   invoice: Invoice;
   message: string;
   task_id: string;
+  extracted_data?: any;
 }
 
 export const uploadInvoice = async (file: File): Promise<UploadResponse> => {
@@ -38,11 +39,9 @@ export const uploadInvoice = async (file: File): Promise<UploadResponse> => {
 };
 
 export const getReconciliationResults = async (taskId: string) => {
-  console.log('Fetching results for task:', taskId);
   if (!taskId) {
     throw new Error('No task ID provided');
   }
   const response = await axios.get(`${API_BASE_URL}/results/${taskId}`);
-  console.log('Results response:', response.data);
   return response.data;
 }; 
