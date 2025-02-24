@@ -206,34 +206,56 @@ docker-compose restart redis
 docker-compose exec postgres pg_dump -U admin llm_ecosystem > backup.sql
 ```
 
-### Update Dependencies
-```bash
-# Frontend
-cd frontend
-npm update
+## Database Design
 
-# Backend
-cd backend
-pip install --upgrade -r requirements.txt
+```
+graph TD
+    A[Invoice Collection] --> B[Report Collection]
+    A --> C[Reconciliation Collection]
+    D[PurchaseOrder Collection] --> C
 ```
 
-### Clean Up
-```bash
-# Remove all containers and volumes
-docker-compose down -v
+# Invoice Collection
+{
+    "_id": ObjectId,
+    "file_path": str,
+    "upload_date": datetime,
+    "status": str,  # PENDING, PROCESSING, COMPLETED
+    "extracted_data": {
+        "bill_to": str,
+        "emailing_address": str,
+        "invoice_number": str,
+        "invoice_date": str,
+        "invoice_amount": str,
+        "services": [{
+            "service": str,
+            "quantity": str,
+            "unit_price": str,
+            "amount": str
+        }]
+    },
+    "user_edited_data": {  # Store user modifications
+        # Same structure as extracted_data
+    },
+    "metadata": {
+        "file_type": str,
+        "file_size": int,
+        "processing_time": float
+    }
+}
 
-# Remove unused Docker images
-docker system prune
-```
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Commit your changes
-4. Push to the branch
-5. Create a Pull Request
-
-## License
-
-[Your License Here]
+# Report Collection
+{
+    "_id": ObjectId,
+    "invoice_id": ObjectId,
+    "created_at": datetime,
+    "processing_status": str,
+    "ocr_confidence": float,
+    "processing_time": float,
+    "error_logs": [str],
+    "validation_results": {
+        "field_accuracy": float,
+        "missing_fields": [str],
+        "warnings": [str]
+    }
+}

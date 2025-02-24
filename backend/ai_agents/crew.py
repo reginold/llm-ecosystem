@@ -26,7 +26,7 @@ class DataMatcher:
             'services'
         ]
         self.openai_client = OpenAI()
-        self.model_name = "gpt-4-turbo-preview"
+        self.model_name = "gpt-4o"
 
     def match_data(self, extracted_data: str) -> dict:
         try:

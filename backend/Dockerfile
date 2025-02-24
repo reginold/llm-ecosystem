@@ -2,7 +2,6 @@ FROM python:3.10-slim
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
-    postgresql-client \
     redis-tools \
     libmagic1 \
     libmagic-dev \
@@ -20,6 +19,10 @@ COPY . .
 
 # Create uploads directory
 RUN mkdir -p uploads
+
+# Create MongoDB log directory
+RUN mkdir -p /var/log/mongodb && \
+    chmod 777 /var/log/mongodb
 
 # Make start script executable
 COPY start.sh .

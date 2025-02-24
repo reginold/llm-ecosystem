@@ -1,47 +1,94 @@
-import axios from 'axios';
-import { Invoice } from '../types';
+// Remove this line since we're not using it
+// import { Invoice } from '../types';
 
-const API_BASE_URL = 'http://localhost:5000/api';
+// Update this to match the backend URL from docker-compose
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
 interface UploadResponse {
   success: boolean;
-  invoice: Invoice;
   message: string;
+  invoice_id: string;
   task_id: string;
-  extracted_data?: any;
+}
+
+interface SaveInvoiceData {
+  invoice_id: string;
+  edited_data: {
+    'Bill To': string;
+    'Emailing Address': string;
+    'Invoice Number': string;
+    'Invoice Date': string;
+    'Invoice Amount': string;
+    'Services': Array<{
+      Service: string;
+      Quantity: string;
+      'Unit Price': string;
+      Amount: string;
+    }>;
+  };
 }
 
 export const uploadInvoice = async (file: File): Promise<UploadResponse> => {
+  const formData = new FormData();
+  formData.append('file', file);
+
   try {
-    const formData = new FormData();
-    formData.append('invoice_file', file);
-    
-    const response = await axios.post<UploadResponse>(`${API_BASE_URL}/upload-invoice`, formData, {
+    console.log('Uploading to:', `${API_BASE_URL}/api/upload`); // Note the /api/upload path
+    const response = await fetch(`${API_BASE_URL}/api/upload`, {
+      method: 'POST',
+      body: formData,
       headers: {
-        'Content-Type': 'multipart/form-data',
+        'Accept': 'application/json',
       },
     });
-    
-    console.log('Upload response:', response.data);
-    
-    if (!response.data.task_id) {
-      throw new Error('No task ID received from server');
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Upload failed:', response.status, errorText); // Debug log
+      throw new Error(`Upload failed: ${response.status} ${errorText}`);
     }
-    
-    return response.data;
+
+    return response.json();
   } catch (error) {
-    console.error('Upload error:', error);
-    if (axios.isAxiosError(error)) {
-      throw new Error(error.response?.data?.message || 'Error uploading invoice');
-    }
+    console.error('Upload error:', error); // Debug log
     throw error;
   }
 };
 
 export const getReconciliationResults = async (taskId: string) => {
-  if (!taskId) {
-    throw new Error('No task ID provided');
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/results/${taskId}`);
+    if (!response.ok) {
+      throw new Error('Error getting results');
+    }
+    return response.json();
+  } catch (error) {
+    console.error('Results error:', error);
+    throw error;
   }
-  const response = await axios.get(`${API_BASE_URL}/results/${taskId}`);
-  return response.data;
+};
+
+export const saveInvoiceData = async (data: SaveInvoiceData): Promise<any> => {
+  try {
+    console.log('Saving data:', data);
+    const response = await fetch(`${API_BASE_URL}/api/invoice/save`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Save failed:', response.status, errorText);
+      throw new Error(`Save failed: ${response.status} ${errorText}`);
+    }
+
+    return response.json();
+  } catch (error) {
+    console.error('Save error:', error);
+    throw error;
+  }
 }; 
