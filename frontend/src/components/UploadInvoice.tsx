@@ -16,6 +16,13 @@ interface ExtractedData {
   }>;
 }
 
+interface ServiceData {
+  service: string;
+  quantity: string;
+  unit_price: string;
+  amount: string;
+}
+
 const UploadInvoice: React.FC = () => {
   const [file, setFile] = useState<File | null>(null);
   const [dragActive, setDragActive] = useState(false);
@@ -27,27 +34,50 @@ const UploadInvoice: React.FC = () => {
   const mutation = useMutation(uploadInvoice, {
     onSuccess: (data) => {
       console.log('Upload successful, full response:', data);
-      setIsOcrProcessing(true);  // Start OCR processing
-      // Poll for results
+      setIsOcrProcessing(true);
       const pollInterval = setInterval(async () => {
         try {
           const results = await getReconciliationResults(data.task_id);
           if (results.status === 'COMPLETED') {
-            setIsOcrProcessing(false);  // OCR processing complete
+            setIsOcrProcessing(false);
             setRawResponse(results);
             if (results.extracted_data) {
-              setExtractedData(
-                typeof results.extracted_data === 'string' 
-                  ? JSON.parse(results.extracted_data)
-                  : results.extracted_data
-              );
+              console.log("Raw extracted_data:", results.extracted_data);
+              console.log("Type of extracted_data:", typeof results.extracted_data);
+              
+              // Get the nested extracted_data
+              const parsedData = results.extracted_data.extracted_data;
+              
+              console.log("Parsed Data structure:", {
+                keys: Object.keys(parsedData),
+                billTo: parsedData.bill_to,
+                email: parsedData.emailing_address,
+                sample: JSON.stringify(parsedData, null, 2)
+              });
+              
+              const formattedData: ExtractedData = {
+                'Bill To': parsedData.bill_to || '-',
+                'Emailing Address': parsedData.emailing_address || '-',
+                'Invoice Number': parsedData.invoice_number || '-',
+                'Invoice Date': parsedData.invoice_date || '-',
+                'Invoice Amount': parsedData.invoice_amount || '-',
+                'Services': (parsedData.services || []).map((service: ServiceData) => ({
+                  'Service': service.service,
+                  'Quantity': service.quantity,
+                  'Unit Price': service.unit_price,
+                  'Amount': service.amount
+                }))
+              };
+              
+              console.log("Final formatted data:", formattedData);
+              setExtractedData(formattedData);
             }
             clearInterval(pollInterval);
           }
         } catch (error) {
           console.error('Error polling for results:', error);
         }
-      }, 2000);  // Poll every 2 seconds
+      }, 2000);
     },
     onError: (error: Error) => {
       console.error('Upload error:', error);
