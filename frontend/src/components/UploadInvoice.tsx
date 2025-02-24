@@ -129,7 +129,7 @@ const UploadInvoice: React.FC = () => {
                 <input
                   type="file"
                   onChange={handleFileChange}
-                  accept=".pdf,.csv,.json"
+                  accept=".pdf,.jpg,.jpeg,.png,.csv,.json"
                   className="hidden"
                   id="file-upload"
                 />
@@ -163,6 +163,8 @@ const UploadInvoice: React.FC = () => {
               <h3 className="text-sm font-medium text-gray-700 mb-2">Supported Formats</h3>
               <ul className="text-xs text-gray-600 space-y-1">
                 <li>PDF documents (max 10MB)</li>
+                <li>JPG and JPEG images (max 10MB)</li>
+                <li>PNG images (max 10MB)</li>
                 <li>CSV spreadsheets</li>
                 <li>JSON data files</li>
               </ul>
