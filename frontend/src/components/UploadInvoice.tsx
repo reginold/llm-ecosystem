@@ -11,14 +11,18 @@ const UploadInvoice: React.FC = () => {
 
   const mutation = useMutation(uploadInvoice, {
     onSuccess: (data) => {
-      console.log('Upload successful', data);
-      if (data.task_id) {
-        navigate(`/results/${data.task_id}`);
+      console.log('Upload successful, full response:', data);
+      const taskId = data.task_id;
+      if (taskId) {
+        console.log('Navigating to results with task ID:', taskId);
+        navigate(`/results/${taskId}`, { replace: true });
       } else {
+        console.error('No task ID in response:', data);
         setError('No task ID received from server');
       }
     },
     onError: (error: Error) => {
+      console.error('Upload error:', error);
       setError(error.message);
     },
   });

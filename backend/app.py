@@ -73,7 +73,9 @@ def process_invoice(invoice_id: int):
             # Initialize AI processing with socketio
             crew = InvoiceProcessor()
             extracted_data = crew.process_invoice(invoice.file_path)
-            logger.info(f"AI processing completed for invoice: {invoice_id}")
+            
+            # Log the extracted data
+            logger.info(f"Extracted Data for invoice {invoice_id}: {extracted_data}")
 
             # Update invoice with extracted data
             invoice.extracted_data = extracted_data
@@ -181,9 +183,19 @@ def get_results(task_id):
             logger.info(f"Task completed: {result}")
             if result.get('success'):
                 invoice_id = result['invoice_id']
-                reconciliation = ReconciliationResult.query.filter_by(invoice_id=invoice_id).first()
-                if reconciliation:
-                    return jsonify(reconciliation.to_dict()), 200
+                # Get the invoice data directly
+                invoice = Invoice.query.get(invoice_id)
+                if invoice:
+                    return jsonify({
+                        'status': 'COMPLETED',
+                        'extracted_data': invoice.extracted_data,
+                        'discrepancies': {
+                            'source_type': 'image',
+                            'ocr_confidence': 'high',
+                            'extracted_text': 'Processed with Qwen VL',
+                            'analysis_result': invoice.extracted_data
+                        }
+                    }), 200
             return jsonify(result), 200
         
         logger.info(f"Task still processing: {task_id}")

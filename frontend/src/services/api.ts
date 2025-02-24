@@ -19,18 +19,17 @@ export const uploadInvoice = async (file: File): Promise<UploadResponse> => {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
-      onUploadProgress: (progressEvent) => {
-        const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total!);
-        console.log('Upload Progress:', percentCompleted);
-      },
     });
     
+    console.log('Upload response:', response.data);
+    
     if (!response.data.task_id) {
-      throw new Error('No task ID received');
+      throw new Error('No task ID received from server');
     }
     
     return response.data;
   } catch (error) {
+    console.error('Upload error:', error);
     if (axios.isAxiosError(error)) {
       throw new Error(error.response?.data?.message || 'Error uploading invoice');
     }
@@ -38,7 +37,12 @@ export const uploadInvoice = async (file: File): Promise<UploadResponse> => {
   }
 };
 
-export const getReconciliationResults = async (invoiceId: string) => {
-  const response = await axios.get(`${API_BASE_URL}/results/${invoiceId}`);
+export const getReconciliationResults = async (taskId: string) => {
+  console.log('Fetching results for task:', taskId);
+  if (!taskId) {
+    throw new Error('No task ID provided');
+  }
+  const response = await axios.get(`${API_BASE_URL}/results/${taskId}`);
+  console.log('Results response:', response.data);
   return response.data;
 }; 

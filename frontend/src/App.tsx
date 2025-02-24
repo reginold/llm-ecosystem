@@ -8,7 +8,7 @@ import Layout from './components/Layout';
 
 const queryClient = new QueryClient();
 
-function App() {
+const App: React.FC = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <Router>
@@ -16,12 +16,12 @@ function App() {
           <Routes>
             <Route path="/" element={<Dashboard />} />
             <Route path="/upload" element={<UploadInvoice />} />
-            <Route path="/results/:invoiceId" element={<ReconciliationResults />} />
+            <Route path="/results/:taskId" element={<ReconciliationResults />} />
           </Routes>
         </Layout>
       </Router>
     </QueryClientProvider>
   );
-}
+};
 
 export default App; 
