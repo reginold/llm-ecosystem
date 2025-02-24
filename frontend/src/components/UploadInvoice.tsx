@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { useMutation } from 'react-query';
 import { uploadInvoice, getReconciliationResults } from '../services/api';
 
@@ -30,6 +30,7 @@ const UploadInvoice: React.FC = () => {
   const [extractedData, setExtractedData] = useState<ExtractedData | null>(null);
   const [rawResponse, setRawResponse] = useState<any>(null);
   const [isOcrProcessing, setIsOcrProcessing] = useState(false);
+  const [editableData, setEditableData] = useState<ExtractedData | null>(null);
 
   const mutation = useMutation(uploadInvoice, {
     onSuccess: (data) => {
@@ -85,6 +86,35 @@ const UploadInvoice: React.FC = () => {
       setIsOcrProcessing(false);
     },
   });
+
+  useEffect(() => {
+    if (extractedData) {
+      setEditableData(extractedData);
+    }
+  }, [extractedData]);
+
+  const handleInputChange = (field: keyof ExtractedData, value: string) => {
+    if (editableData) {
+      setEditableData({
+        ...editableData,
+        [field]: value
+      });
+    }
+  };
+
+  const handleServiceChange = (index: number, field: keyof ExtractedData['Services'][0], value: string) => {
+    if (editableData) {
+      const updatedServices = [...editableData.Services];
+      updatedServices[index] = {
+        ...updatedServices[index],
+        [field]: value
+      };
+      setEditableData({
+        ...editableData,
+        Services: updatedServices
+      });
+    }
+  };
 
   const handleDrag = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -257,33 +287,48 @@ const UploadInvoice: React.FC = () => {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Bill To</label>
-                  <div className="mt-1 p-2 bg-gray-50 rounded-md">
-                    {extractedData ? extractedData['Bill To'] : '-'}
-                  </div>
+                  <input
+                    type="text"
+                    value={editableData?.['Bill To'] || ''}
+                    onChange={(e) => handleInputChange('Bill To', e.target.value)}
+                    className="mt-1 p-2 w-full border rounded-md bg-white focus:ring-blue-500 focus:border-blue-500"
+                  />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Emailing Address</label>
-                  <div className="mt-1 p-2 bg-gray-50 rounded-md">
-                    {extractedData ? extractedData['Emailing Address'] : '-'}
-                  </div>
+                  <input
+                    type="email"
+                    value={editableData?.['Emailing Address'] || ''}
+                    onChange={(e) => handleInputChange('Emailing Address', e.target.value)}
+                    className="mt-1 p-2 w-full border rounded-md bg-white focus:ring-blue-500 focus:border-blue-500"
+                  />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Invoice Number</label>
-                  <div className="mt-1 p-2 bg-gray-50 rounded-md">
-                    {extractedData ? extractedData['Invoice Number'] : '-'}
-                  </div>
+                  <input
+                    type="text"
+                    value={editableData?.['Invoice Number'] || ''}
+                    onChange={(e) => handleInputChange('Invoice Number', e.target.value)}
+                    className="mt-1 p-2 w-full border rounded-md bg-white focus:ring-blue-500 focus:border-blue-500"
+                  />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Invoice Date</label>
-                  <div className="mt-1 p-2 bg-gray-50 rounded-md">
-                    {extractedData ? extractedData['Invoice Date'] : '-'}
-                  </div>
+                  <input
+                    type="text"
+                    value={editableData?.['Invoice Date'] || ''}
+                    onChange={(e) => handleInputChange('Invoice Date', e.target.value)}
+                    className="mt-1 p-2 w-full border rounded-md bg-white focus:ring-blue-500 focus:border-blue-500"
+                  />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Invoice Amount</label>
-                  <div className="mt-1 p-2 bg-gray-50 rounded-md">
-                    {extractedData ? extractedData['Invoice Amount'] : '-'}
-                  </div>
+                  <input
+                    type="text"
+                    value={editableData?.['Invoice Amount'] || ''}
+                    onChange={(e) => handleInputChange('Invoice Amount', e.target.value)}
+                    className="mt-1 p-2 w-full border rounded-md bg-white focus:ring-blue-500 focus:border-blue-500"
+                  />
                 </div>
               </div>
 
@@ -301,12 +346,40 @@ const UploadInvoice: React.FC = () => {
                       </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
-                      {extractedData?.Services?.map((service, index) => (
+                      {editableData?.Services?.map((service, index) => (
                         <tr key={index}>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{service.Service}</td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{service.Quantity}</td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{service['Unit Price']}</td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{service.Amount}</td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <input
+                              type="text"
+                              value={service.Service}
+                              onChange={(e) => handleServiceChange(index, 'Service', e.target.value)}
+                              className="w-full p-1 border rounded text-sm focus:ring-blue-500 focus:border-blue-500"
+                            />
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <input
+                              type="text"
+                              value={service.Quantity}
+                              onChange={(e) => handleServiceChange(index, 'Quantity', e.target.value)}
+                              className="w-full p-1 border rounded text-sm focus:ring-blue-500 focus:border-blue-500"
+                            />
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <input
+                              type="text"
+                              value={service['Unit Price']}
+                              onChange={(e) => handleServiceChange(index, 'Unit Price', e.target.value)}
+                              className="w-full p-1 border rounded text-sm focus:ring-blue-500 focus:border-blue-500"
+                            />
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <input
+                              type="text"
+                              value={service.Amount}
+                              onChange={(e) => handleServiceChange(index, 'Amount', e.target.value)}
+                              className="w-full p-1 border rounded text-sm focus:ring-blue-500 focus:border-blue-500"
+                            />
+                          </td>
                         </tr>
                       )) || (
                         <tr>
@@ -395,9 +468,9 @@ const UploadInvoice: React.FC = () => {
           <button
             type="button"
             onClick={() => {/* Handle confirmation */}}
-            disabled={!extractedData || mutation.isLoading}
+            disabled={!editableData || mutation.isLoading}
             className={`px-6 py-2.5 rounded-lg text-white font-medium transition-colors ${
-              !extractedData || mutation.isLoading
+              !editableData || mutation.isLoading
                 ? 'bg-gray-400 cursor-not-allowed'
                 : 'bg-green-600 hover:bg-green-700'
             }`}
